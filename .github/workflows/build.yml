@@ -42,6 +42,7 @@ jobs:
             env: seeed_xiao_esp32c6
           - project: 11_relay_zigbee_router
             env: seeed_xiao_esp32c6
+          
 
     steps:
       - uses: actions/checkout@v4
