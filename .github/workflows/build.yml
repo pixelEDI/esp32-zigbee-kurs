@@ -1,0 +1,71 @@
+name: ESP32-XIAO Build
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "**/*.cpp"
+      - "**/*.c"
+      - "**/*.h"
+      - "**/*.hpp"
+      - "**/*.ino"
+      - "**/platformio.ini"
+      - "**/*.csv"
+      - ".github/workflows/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - project: 01_cpu_temperature
+            env: seeed_xiao_esp32c6
+          - project: 02_sht3x_only_temperature
+            env: seeed_xiao_esp32c6
+          - project: 03_sht3x_hum_temp
+            env: seeed_xiao_esp32c6
+          - project: 04_sht3x_deepsleep_with_battery
+            env: seeed_xiao_esp32c6
+          - project: 05_xiao_log
+            env: seeed_xiao_esp32c6
+          - project: 06_on_off_switch
+            env: seeed_xiao_esp32c6
+          - project: 07_on_off_switch_response
+            env: seeed_xiao_esp32c6
+          - project: 08_scdl41_only_sensorreadings
+            env: seeed_xiao_esp32c6
+          - project: 09_CO_scdl41
+            env: seeed_xiao_esp32c6
+          - project: 10_tuerkontakt
+            env: seeed_xiao_esp32c6
+          - project: 11_relay_zigbee_router
+            env: seeed_xiao_esp32c6
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
+
+      - name: Build Firmware
+        run: pio run -e ${{ matrix.env }}
+        working-directory: ${{ github.workspace }}/${{ matrix.project }}
+
+      - name: Upload Firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.project }}-firmware
+          path: ${{ github.workspace }}/${{ matrix.project }}/.pio/build/${{ matrix.env }}/firmware.bin
